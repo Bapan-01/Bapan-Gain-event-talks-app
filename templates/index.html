@@ -52,7 +52,7 @@
 
         <!-- Stats Summary Section -->
         <section class="stats-container" id="statsContainer">
-            <div class="stat-card" data-category="All">
+            <div class="stat-card" data-category="All" title="Click to show all release notes">
                 <div class="stat-icon-wrapper main-icon">
                     <i class="fa-solid fa-list-ul"></i>
                 </div>
@@ -61,7 +61,7 @@
                     <span class="stat-label">Total Notes</span>
                 </div>
             </div>
-            <div class="stat-card" data-category="Feature">
+            <div class="stat-card" data-category="Feature" title="Click to show Features only">
                 <div class="stat-icon-wrapper feature-icon">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                 </div>
@@ -70,7 +70,7 @@
                     <span class="stat-label">Features</span>
                 </div>
             </div>
-            <div class="stat-card" data-category="Change">
+            <div class="stat-card" data-category="Change" title="Click to show Changes only">
                 <div class="stat-icon-wrapper change-icon">
                     <i class="fa-solid fa-sliders"></i>
                 </div>
@@ -79,7 +79,7 @@
                     <span class="stat-label">Changes</span>
                 </div>
             </div>
-            <div class="stat-card" data-category="Issue">
+            <div class="stat-card" data-category="Issue" title="Click to show Issues only">
                 <div class="stat-icon-wrapper issue-icon">
                     <i class="fa-solid fa-circle-exclamation"></i>
                 </div>
@@ -88,7 +88,7 @@
                     <span class="stat-label">Issues</span>
                 </div>
             </div>
-            <div class="stat-card" data-category="Breaking">
+            <div class="stat-card" data-category="Breaking" title="Click to show Breaking Changes only">
                 <div class="stat-icon-wrapper breaking-icon">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </div>
@@ -115,30 +115,37 @@
                 </div>
 
                 <div class="filter-group">
-                    <label class="filter-label">Categories</label>
+                    <div class="filter-header-row">
+                        <label class="filter-label">Categories</label>
+                        <div class="filter-helper-links">
+                            <button id="selectAllCatsBtn" class="link-btn" title="Select all categories">All</button>
+                            <span class="divider">|</span>
+                            <button id="clearAllCatsBtn" class="link-btn" title="Clear all categories">None</button>
+                        </div>
+                    </div>
                     <div class="checkbox-group" id="categoryCheckboxes">
                         <!-- Will be dynamically populated with counts, but we specify the defaults -->
-                        <div class="checkbox-item checked" data-category="Feature">
+                        <div class="checkbox-item checked" data-category="Feature" tabindex="0" role="checkbox" aria-checked="true" title="Toggle Feature category">
                             <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
                             <span class="checkbox-text">Feature</span>
                             <span class="category-badge count-badge badge-feature">0</span>
                         </div>
-                        <div class="checkbox-item checked" data-category="Change">
+                        <div class="checkbox-item checked" data-category="Change" tabindex="0" role="checkbox" aria-checked="true" title="Toggle Change category">
                             <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
                             <span class="checkbox-text">Change</span>
                             <span class="category-badge count-badge badge-change">0</span>
                         </div>
-                        <div class="checkbox-item checked" data-category="Issue">
+                        <div class="checkbox-item checked" data-category="Issue" tabindex="0" role="checkbox" aria-checked="true" title="Toggle Issue category">
                             <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
                             <span class="checkbox-text">Issue</span>
                             <span class="category-badge count-badge badge-issue">0</span>
                         </div>
-                        <div class="checkbox-item checked" data-category="Breaking">
+                        <div class="checkbox-item checked" data-category="Breaking" tabindex="0" role="checkbox" aria-checked="true" title="Toggle Breaking category">
                             <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
                             <span class="checkbox-text">Breaking</span>
                             <span class="category-badge count-badge badge-breaking">0</span>
                         </div>
-                        <div class="checkbox-item checked" data-category="Announcement">
+                        <div class="checkbox-item checked" data-category="Announcement" tabindex="0" role="checkbox" aria-checked="true" title="Toggle Announcement category">
                             <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
                             <span class="checkbox-text">Announcement</span>
                             <span class="category-badge count-badge badge-announcement">0</span>
@@ -149,15 +156,15 @@
                 <div class="filter-group">
                     <label class="filter-label">Launch Stage</label>
                     <div class="radio-group" id="stageRadioGroup">
-                        <div class="radio-item active" data-stage="all">
+                        <div class="radio-item active" data-stage="all" tabindex="0" role="radio" aria-checked="true" title="Filter by All Stages">
                             <span class="radio-circle"></span>
                             <span class="radio-text">All Stages</span>
                         </div>
-                        <div class="radio-item" data-stage="ga">
+                        <div class="radio-item" data-stage="ga" tabindex="0" role="radio" aria-checked="false" title="Filter by General Availability Only">
                             <span class="radio-circle"></span>
                             <span class="radio-text">General Availability (GA)</span>
                         </div>
-                        <div class="radio-item" data-stage="preview">
+                        <div class="radio-item" data-stage="preview" tabindex="0" role="radio" aria-checked="false" title="Filter by Preview Only">
                             <span class="radio-circle"></span>
                             <span class="radio-text">Preview</span>
                         </div>

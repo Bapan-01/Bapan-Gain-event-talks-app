@@ -55,7 +55,9 @@ const DOM = {
     // General Buttons
     retryBtn: document.getElementById('retryBtn'),
     resetFiltersBtn: document.getElementById('resetFiltersBtn'),
-    activeChips: document.getElementById('activeChips')
+    activeChips: document.getElementById('activeChips'),
+    selectAllCatsBtn: document.getElementById('selectAllCatsBtn'),
+    clearAllCatsBtn: document.getElementById('clearAllCatsBtn')
 };
 
 // --- Initialize App ---
@@ -409,8 +411,10 @@ function updateCheckboxUI(category, isChecked) {
     if (item) {
         if (isChecked) {
             item.classList.add('checked');
+            item.setAttribute('aria-checked', 'true');
         } else {
             item.classList.remove('checked');
+            item.setAttribute('aria-checked', 'false');
         }
     }
 }
@@ -420,8 +424,10 @@ function updateRadioUI(stage) {
     DOM.stageRadioGroup.querySelectorAll('.radio-item').forEach(item => {
         if (item.getAttribute('data-stage') === stage) {
             item.classList.add('active');
+            item.setAttribute('aria-checked', 'true');
         } else {
             item.classList.remove('active');
+            item.setAttribute('aria-checked', 'false');
         }
     });
 }
@@ -529,31 +535,68 @@ function bindEvents() {
         applyFiltersAndRender();
     });
     
-    // Category Checkbox click handlers
-    DOM.categoryCheckboxes.querySelectorAll('.checkbox-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const category = item.getAttribute('data-category');
-            if (state.filters.categories.has(category)) {
-                // If only 1 checked, don't allow checking off everything
-                if (state.filters.categories.size > 1) {
-                    state.filters.categories.delete(category);
-                    item.classList.remove('checked');
-                }
-            } else {
-                state.filters.categories.add(category);
-                item.classList.add('checked');
+    // Reusable Category Toggle Function
+    const toggleCategory = (item, category) => {
+        if (state.filters.categories.has(category)) {
+            // Keep at least 1 checked to prevent empty lists
+            if (state.filters.categories.size > 1) {
+                state.filters.categories.delete(category);
+                item.classList.remove('checked');
+                item.setAttribute('aria-checked', 'false');
             }
-            applyFiltersAndRender();
+        } else {
+            state.filters.categories.add(category);
+            item.classList.add('checked');
+            item.setAttribute('aria-checked', 'true');
+        }
+        applyFiltersAndRender();
+    };
+
+    // Category Checkbox click & keyboard handlers (for accessibility)
+    DOM.categoryCheckboxes.querySelectorAll('.checkbox-item').forEach(item => {
+        const category = item.getAttribute('data-category');
+        item.addEventListener('click', () => toggleCategory(item, category));
+        item.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                toggleCategory(item, category);
+            }
         });
     });
+
+    // Category Helper buttons: select all/none
+    DOM.selectAllCatsBtn.addEventListener('click', () => {
+        const allCategories = ['Feature', 'Change', 'Issue', 'Breaking', 'Announcement'];
+        allCategories.forEach(cat => {
+            state.filters.categories.add(cat);
+            updateCheckboxUI(cat, true);
+        });
+        applyFiltersAndRender();
+    });
+
+    DOM.clearAllCatsBtn.addEventListener('click', () => {
+        const allCategories = ['Feature', 'Change', 'Issue', 'Breaking', 'Announcement'];
+        state.filters.categories.clear();
+        allCategories.forEach(cat => {
+            updateCheckboxUI(cat, false);
+        });
+        applyFiltersAndRender();
+    });
     
-    // Stage Radio Group handlers
+    // Stage Radio Group click & keyboard handlers (for accessibility)
     DOM.stageRadioGroup.querySelectorAll('.radio-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const stage = item.getAttribute('data-stage');
+        const stage = item.getAttribute('data-stage');
+        const selectStage = () => {
             state.filters.stage = stage;
             updateRadioUI(stage);
             applyFiltersAndRender();
+        };
+        item.addEventListener('click', selectStage);
+        item.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                selectStage();
+            }
         });
     });
     

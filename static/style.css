@@ -1020,6 +1020,7 @@ a:hover {
 .copy-btn {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.4rem;
     font-family: var(--font-sans);
     font-size: 0.75rem;
@@ -1031,6 +1032,7 @@ a:hover {
     border-radius: 6px;
     cursor: pointer;
     transition: all var(--transition-fast);
+    min-width: 80px; /* Fixed width prevents adjacent content from shifting when text updates to "Copied" */
 }
 
 .copy-btn:hover {
@@ -1123,6 +1125,49 @@ body.light-theme .skeleton-line,
 body.light-theme .skeleton-block {
     background: linear-gradient(90deg, #e2e8f0 25%, #cbd5e1 50%, #e2e8f0 75%);
     background-size: 200% 100%;
+}
+
+/* --- Category Helper Link Styles --- */
+.filter-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-helper-links {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    padding: 0;
+    transition: color var(--transition-fast);
+}
+
+.link-btn:hover {
+    color: #22d3ee;
+    text-decoration: underline;
+}
+
+.filter-helper-links .divider {
+    font-size: 0.7rem;
+    color: var(--border-color);
+}
+
+/* Keyboard outline support for accessible navigation */
+.checkbox-item:focus-visible,
+.radio-item:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
 
 
