@@ -40,6 +40,7 @@ const DOM = {
     // Sync Action
     refreshBtn: document.getElementById('refreshBtn'),
     exportCsvBtn: document.getElementById('exportCsvBtn'),
+    themeToggleBtn: document.getElementById('themeToggleBtn'),
     cacheText: document.getElementById('cacheText'),
     cacheStatus: document.getElementById('cacheStatus'),
     
@@ -63,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
+    initTheme();
     bindEvents();
     fetchReleases();
 }
@@ -678,4 +680,37 @@ function exportToCSV() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+}
+
+// --- Theme Management ---
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+    
+    DOM.themeToggleBtn.addEventListener('click', () => {
+        const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
+    });
+}
+
+function setTheme(theme) {
+    const themeIcon = document.getElementById('themeIcon');
+    if (theme === 'light') {
+        document.body.classList.remove('dark-theme');
+        document.body.classList.add('light-theme');
+        DOM.themeToggleBtn.title = "Switch to Dark Mode";
+        if (themeIcon) {
+            themeIcon.className = 'fa-regular fa-moon';
+        }
+        localStorage.setItem('theme', 'light');
+    } else {
+        document.body.classList.remove('light-theme');
+        document.body.classList.add('dark-theme');
+        DOM.themeToggleBtn.title = "Switch to Light Mode";
+        if (themeIcon) {
+            themeIcon.className = 'fa-regular fa-sun';
+        }
+        localStorage.setItem('theme', 'dark');
+    }
 }
