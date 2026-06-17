@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Hub</title>
+    <meta name="description" content="A premium tracker and dashboard for Google BigQuery Release Notes, with real-time searching, filtering, and categorization.">
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Font Awesome for sleek icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dark-theme">
+    <div class="glow-bg"></div>
+    
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-logo">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-database animate-pulse"></i>
+                    <i class="fa-solid fa-bolt bolt-overlay"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>BigQuery</h1>
+                    <span class="subtitle">Release Notes Hub</span>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <div class="cache-status" id="cacheStatus">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span id="cacheText">Checking feed status...</span>
+                </div>
+                <button id="refreshBtn" class="btn btn-secondary" title="Force Refresh">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Sync</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Summary Section -->
+        <section class="stats-container" id="statsContainer">
+            <div class="stat-card" data-category="All">
+                <div class="stat-icon-wrapper main-icon">
+                    <i class="fa-solid fa-list-ul"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statAll">0</span>
+                    <span class="stat-label">Total Notes</span>
+                </div>
+            </div>
+            <div class="stat-card" data-category="Feature">
+                <div class="stat-icon-wrapper feature-icon">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statFeature">0</span>
+                    <span class="stat-label">Features</span>
+                </div>
+            </div>
+            <div class="stat-card" data-category="Change">
+                <div class="stat-icon-wrapper change-icon">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statChange">0</span>
+                    <span class="stat-label">Changes</span>
+                </div>
+            </div>
+            <div class="stat-card" data-category="Issue">
+                <div class="stat-icon-wrapper issue-icon">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statIssue">0</span>
+                    <span class="stat-label">Issues</span>
+                </div>
+            </div>
+            <div class="stat-card" data-category="Breaking">
+                <div class="stat-icon-wrapper breaking-icon">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-value" id="statBreaking">0</span>
+                    <span class="stat-label">Breaking</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Layout Grid -->
+        <main class="main-layout">
+            <!-- Sidebar Filters -->
+            <aside class="sidebar-filters">
+                <div class="filter-group">
+                    <label for="searchInput" class="filter-label">Search Notes</label>
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="searchInput" placeholder="Search SQL, Gemini, tables..." autocomplete="off">
+                        <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Categories</label>
+                    <div class="checkbox-group" id="categoryCheckboxes">
+                        <!-- Will be dynamically populated with counts, but we specify the defaults -->
+                        <div class="checkbox-item checked" data-category="Feature">
+                            <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                            <span class="checkbox-text">Feature</span>
+                            <span class="category-badge count-badge badge-feature">0</span>
+                        </div>
+                        <div class="checkbox-item checked" data-category="Change">
+                            <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                            <span class="checkbox-text">Change</span>
+                            <span class="category-badge count-badge badge-change">0</span>
+                        </div>
+                        <div class="checkbox-item checked" data-category="Issue">
+                            <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                            <span class="checkbox-text">Issue</span>
+                            <span class="category-badge count-badge badge-issue">0</span>
+                        </div>
+                        <div class="checkbox-item checked" data-category="Breaking">
+                            <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                            <span class="checkbox-text">Breaking</span>
+                            <span class="category-badge count-badge badge-breaking">0</span>
+                        </div>
+                        <div class="checkbox-item checked" data-category="Announcement">
+                            <span class="checkbox-custom"><i class="fa-solid fa-check"></i></span>
+                            <span class="checkbox-text">Announcement</span>
+                            <span class="category-badge count-badge badge-announcement">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Launch Stage</label>
+                    <div class="radio-group" id="stageRadioGroup">
+                        <div class="radio-item active" data-stage="all">
+                            <span class="radio-circle"></span>
+                            <span class="radio-text">All Stages</span>
+                        </div>
+                        <div class="radio-item" data-stage="ga">
+                            <span class="radio-circle"></span>
+                            <span class="radio-text">General Availability (GA)</span>
+                        </div>
+                        <div class="radio-item" data-stage="preview">
+                            <span class="radio-circle"></span>
+                            <span class="radio-text">Preview</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="sortSelect" class="filter-label">Sort Order</label>
+                    <div class="select-wrapper">
+                        <i class="fa-solid fa-arrow-down-wide-short select-icon"></i>
+                        <select id="sortSelect">
+                            <option value="desc">Newest First</option>
+                            <option value="asc">Oldest First</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="sidebar-footer">
+                    <p>Official Google BigQuery RSS Feed Tracker</p>
+                    <a href="https://docs.cloud.google.com/feeds/bigquery-release-notes.xml" target="_blank" class="feed-link">
+                        <i class="fa-solid fa-rss"></i> Raw Atom Feed
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Release Notes List Area -->
+            <section class="releases-view">
+                <div class="view-header">
+                    <h2 id="resultsCount">Loading release notes...</h2>
+                    <div class="active-filters-chips" id="activeChips" style="display: none;">
+                        <!-- Dynamically filled with active filters -->
+                    </div>
+                </div>
+
+                <!-- Skeleton Loader -->
+                <div class="skeleton-container" id="skeletonLoader">
+                    <div class="skeleton-card">
+                        <div class="skeleton-line title-line"></div>
+                        <div class="skeleton-line meta-line"></div>
+                        <div class="skeleton-blocks">
+                            <div class="skeleton-block"></div>
+                            <div class="skeleton-block"></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-line title-line"></div>
+                        <div class="skeleton-line meta-line"></div>
+                        <div class="skeleton-blocks">
+                            <div class="skeleton-block"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Container -->
+                <div class="error-container" id="errorContainer" style="display: none;">
+                    <div class="error-icon">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h3>Failed to Fetch Release Notes</h3>
+                    <p id="errorMessage">There was an issue retrieving the release notes feed. Please check your internet connection or try again.</p>
+                    <button class="btn btn-primary" id="retryBtn">
+                        <i class="fa-solid fa-arrows-rotate"></i> Retry
+                    </button>
+                </div>
+
+                <!-- Empty State -->
+                <div class="empty-container" id="emptyContainer" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <h3>No Matches Found</h3>
+                    <p>We couldn't find any release notes matching your search criteria. Try clearing some filters or searching for something else.</p>
+                    <button class="btn btn-primary" id="resetFiltersBtn">Reset Filters</button>
+                </div>
+
+                <!-- Actual Releases List -->
+                <div class="releases-list" id="releasesList">
+                    <!-- Release cards will be rendered here -->
+                </div>
+            </section>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; 2026 BigQuery Release Notes Hub. Powered by Flask &amp; Atom Feed Parsing.</p>
+        </footer>
+    </div>
+
+    <!-- Main Application JavaScript -->
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
