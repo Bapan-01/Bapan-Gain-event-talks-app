@@ -39,6 +39,7 @@ const DOM = {
     
     // Sync Action
     refreshBtn: document.getElementById('refreshBtn'),
+    exportCsvBtn: document.getElementById('exportCsvBtn'),
     cacheText: document.getElementById('cacheText'),
     cacheStatus: document.getElementById('cacheStatus'),
     
@@ -312,9 +313,14 @@ function renderList() {
                     <div class="release-item-header">
                         <span class="category-badge ${categoryBadgeClass}">${item.category}</span>
                         ${stageBadgesHtml}
-                        <button class="tweet-btn" title="Share this update on Twitter / X">
-                            <i class="fa-brands fa-x-twitter"></i> Tweet
-                        </button>
+                        <div class="release-item-actions">
+                            <button class="copy-btn" title="Copy note plain-text to clipboard">
+                                <i class="fa-regular fa-copy"></i> Copy
+                            </button>
+                            <button class="tweet-btn" title="Share this update on Twitter / X">
+                                <i class="fa-brands fa-x-twitter"></i> Tweet
+                            </button>
+                        </div>
                     </div>
                     <div class="release-item-content">
                         ${item.description}
@@ -420,6 +426,41 @@ function updateRadioUI(stage) {
 
 // --- Bind Events ---
 function bindEvents() {
+    // Copy to Clipboard Button Handler (Event Delegation)
+    DOM.releasesList.addEventListener('click', (e) => {
+        const copyBtn = e.target.closest('.copy-btn');
+        if (copyBtn) {
+            const releaseItem = copyBtn.closest('.release-item');
+            const releaseCard = copyBtn.closest('.release-group-card');
+            
+            const category = releaseItem.getAttribute('data-category');
+            const date = releaseCard.querySelector('.release-date-title').textContent.trim();
+            const rawHtml = releaseItem.querySelector('.release-item-content').innerHTML;
+            
+            // Extract plain text from description HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = rawHtml;
+            let text = tempDiv.textContent || tempDiv.innerText || '';
+            text = text.replace(/\s+/g, ' ').trim();
+            
+            const copyText = `BigQuery Release Note - ${date} [${category}]\n\n${text}`;
+            
+            navigator.clipboard.writeText(copyText).then(() => {
+                // UI feedback
+                const origHtml = copyBtn.innerHTML;
+                copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
+                copyBtn.classList.add('success');
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = origHtml;
+                    copyBtn.classList.remove('success');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+    });
+
     // Tweet Share Button Handler (Event Delegation)
     DOM.releasesList.addEventListener('click', (e) => {
         const tweetBtn = e.target.closest('.tweet-btn');
@@ -539,6 +580,9 @@ function bindEvents() {
     
     // Reset Filters button
     DOM.resetFiltersBtn.addEventListener('click', resetAllFilters);
+
+    // Export to CSV button
+    DOM.exportCsvBtn.addEventListener('click', exportToCSV);
     
     // Interactive Metric Cards: clicking a stat card isolates that category!
     DOM.statsContainer.querySelectorAll('.stat-card').forEach(card => {
@@ -580,4 +624,58 @@ function resetAllFilters() {
     DOM.sortSelect.value = 'desc';
     
     applyFiltersAndRender();
+}
+
+// --- Export to CSV Function ---
+function exportToCSV() {
+    if (!state.filteredReleases || state.filteredReleases.length === 0) {
+        alert("No release notes found to export.");
+        return;
+    }
+    
+    // Headers for CSV
+    const headers = ["Date", "Category", "Launch Stage", "Description", "Source Link"];
+    
+    // Format rows with quoting and escaping
+    const csvRows = [headers.map(h => `"${h.replace(/"/g, '""')}"`).join(",")];
+    
+    state.filteredReleases.forEach(rel => {
+        const date = rel.date || "";
+        const link = rel.link || "";
+        
+        rel.items.forEach(item => {
+            const category = item.category || "";
+            
+            let stage = "GA";
+            if (item.is_preview) {
+                stage = "Preview";
+            } else if (!item.is_ga && !item.is_preview) {
+                stage = "Announcement";
+            }
+            
+            // Extract plain text from description HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = item.description || "";
+            let description = tempDiv.textContent || tempDiv.innerText || '';
+            description = description.replace(/\s+/g, ' ').trim();
+            
+            const row = [date, category, stage, description, link];
+            csvRows.push(row.map(val => `"${val.replace(/"/g, '""')}"`).join(","));
+        });
+    });
+    
+    const csvString = csvRows.join("\n");
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    
+    const dateStr = new Date().toISOString().split('T')[0];
+    link.setAttribute("download", `bigquery_releases_export_${dateStr}.csv`);
+    document.body.appendChild(link);
+    
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
